@@ -79,12 +79,17 @@ class Node:
         queue = []
         queue.append([self.state])
         visited = []
+        closed = []
+        open = [[self.state]]
         while queue:
             path = queue.pop(0)
+            open.pop(0)
             node = path[-1]
             jugA = node[0]
 
             if jugA == goal:
+                print("open: ", open)
+                print("closed: ", closed)
                 return path
             else:
                 myState = Node(node)
@@ -94,6 +99,8 @@ class Node:
                         newPath = list(path)
                         newPath.append(i)
                         queue.append(newPath)
+                        open.append(i)
+                closed.append(myState.state)
 
     def DFS(self, goal):
         """Depth First Search"""
@@ -101,13 +108,15 @@ class Node:
         stack.append([self.state])
         visited = []
         closed = []
+        open = [[self.state]]
         while stack:
             path = stack.pop()
+            open.pop()
             node = path[-1]
             jugA = node[0]
 
             if jugA == goal:
-                print("open: ", stack)
+                print("open: ", open)
                 print("closed: ", closed)
                 return path
             else:
@@ -118,6 +127,7 @@ class Node:
                         newPath = list(path)
                         newPath.append(i)
                         stack.append(newPath)
+                        open.append(i)
                 closed.append(myState.state)
     print("")
 
