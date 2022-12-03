@@ -1,3 +1,4 @@
+
 class Node:
     """A node state for water jug problem"""
 
@@ -7,6 +8,8 @@ class Node:
         self.capacityJugB = 3
         # self.visited = [self.state]
         # self.visited.extend(visited)
+        self.file = open('graph.dot', 'w')
+        self.file.write('strict graph G {')
 
     def fillA(self, visited):
         if self.state[0] < self.capacityJugA and ([self.capacityJugA, self.state[1]] not in visited):
@@ -76,6 +79,7 @@ class Node:
 
     def BFS(self, goal):
         """Breadth First Search"""
+        # write dot file graphviz format
         queue = []
         queue.append([self.state])
         visited = []
@@ -90,6 +94,8 @@ class Node:
             if jugA == goal:
                 print("open: ", open)
                 print("closed: ", closed)
+                self.file.write('}')
+                self.file.close()
                 return path
             else:
                 myState = Node(node)
@@ -100,7 +106,12 @@ class Node:
                         newPath.append(i)
                         queue.append(newPath)
                         open.append(i)
+                        nodeA = str(node[0]) + "." + str(node[1])
+                        nodeB = str(i[0]) + "." + str(i[1])
+                        self.file.write(nodeA + ' -- ' + nodeB + ";")
                 closed.append(myState.state)
+
+
 
     def DFS(self, goal):
         """Depth First Search"""
@@ -118,6 +129,8 @@ class Node:
             if jugA == goal:
                 print("open: ", open)
                 print("closed: ", closed)
+                self.file.write('}')
+                self.file.close()
                 return path
             else:
                 myState = Node(node)
@@ -128,6 +141,9 @@ class Node:
                         newPath.append(i)
                         stack.append(newPath)
                         open.append(i)
+                        nodeA = str(node[0]) + "." + str(node[1])
+                        nodeB = str(i[0]) + "." + str(i[1])
+                        self.file.write(nodeA + ' -- ' + nodeB + ";")
                 closed.append(myState.state)
     print("")
 
@@ -146,6 +162,8 @@ class Node:
             if jugA == goal:
                 print("open: ", stack)
                 print("closed: ", closed)
+                self.file.write('}')
+                self.file.close()
                 return path
             else:
                 myState = Node(node)
@@ -156,4 +174,7 @@ class Node:
                         newPath.append(i)
                         stack.append(newPath)
                         closed.append(myState.state)
+                        nodeA = str(node[0]) + "." + str(node[1])
+                        nodeB = str(i[0]) + "." + str(i[1])
+                        self.file.write(nodeA + ' -- ' + nodeB + ";")
                         break
