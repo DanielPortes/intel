@@ -1,15 +1,16 @@
-
 class Node:
     """A node state for water jug problem"""
 
-    def __init__(self, start):
+    def __init__(self, start, order):
         self.state = start
         self.capacityJugA = 5
         self.capacityJugB = 3
-        # self.visited = [self.state]
-        # self.visited.extend(visited)
+
+        self.ascendingOrder = order
+        self.ascendingOrder.lower()
+        # pura gambiarra isso, nao consegui fazer dentro de cada metodo, erro de 'compilacao'
         self.file = open('graph.dot', 'w')
-        self.file.write('strict graph G {')
+        self.file.write('strict graph G {\n')
 
     def fillA(self, visited):
         if self.state[0] < self.capacityJugA and ([self.capacityJugA, self.state[1]] not in visited):
@@ -77,6 +78,11 @@ class Node:
         return [self.fillA(visited), self.fillB(visited), self.emptyA(visited), self.emptyB(visited),
                 self.pourAtoB(visited), self.pourBtoA(visited)]
 
+    def writeSolutionToFile(self, path):
+        self.file.write("subgraph Solution {\n")
+        for i in path:
+            self.file.write(str(i[0]) + "." + str(i[1]) + " [color=red];\n")
+        self.file.write("}\n")
     def BFS(self, goal):
         """Breadth First Search"""
         queue = []
@@ -93,12 +99,14 @@ class Node:
             if jugA == goal:
                 print("open: ", open)
                 print("closed: ", closed)
+                self.writeSolutionToFile(path)
                 self.file.write('}')
                 self.file.close()
                 return path
             else:
-                myState = Node(node)
+                myState = Node(node, self.ascendingOrder)
                 listOfList = myState.applyOperators(visited)
+                listOfList = self.applyReorderningRules(listOfList)
                 for i in listOfList:
                     if i and i not in path:
                         newPath = list(path)
@@ -107,13 +115,21 @@ class Node:
                         open.append(i)
                         nodeA = str(node[0]) + "." + str(node[1])
                         nodeB = str(i[0]) + "." + str(i[1])
-                        self.file.write(nodeA + ' -- ' + nodeB + ";")
+                        if self.ascendingOrder == "asc":
+                            ruleValue = str(listOfList.index(i) + 1)
+                        else:
+                            ruleValue = str(6 - listOfList.index(i))
+                        self.file.write(nodeA + ' -- ' + nodeB + "[label= R" + ruleValue + "];\n")
                 closed.append(myState.state)
 
-
+    def applyReorderningRules(self, listOfList):
+        if not (self.ascendingOrder == "asc"):
+            listOfList.reverse()
+        return listOfList
 
     def DFS(self, goal):
         """Depth First Search"""
+
         stack = []
         stack.append([self.state])
         visited = []
@@ -128,12 +144,14 @@ class Node:
             if jugA == goal:
                 print("open: ", open)
                 print("closed: ", closed)
+                self.writeSolutionToFile(path)
                 self.file.write('}')
                 self.file.close()
                 return path
             else:
-                myState = Node(node)
+                myState = Node(node, self.ascendingOrder)
                 listOfList = myState.applyOperators(visited)
+                listOfList = self.applyReorderningRules(listOfList)
                 for i in listOfList:
                     if i and i not in path:
                         newPath = list(path)
@@ -142,10 +160,14 @@ class Node:
                         open.append(i)
                         nodeA = str(node[0]) + "." + str(node[1])
                         nodeB = str(i[0]) + "." + str(i[1])
-                        self.file.write(nodeA + ' -- ' + nodeB + ";")
+                        if self.ascendingOrder == "asc":
+                            ruleValue = str(listOfList.index(i) + 1)
+                        else:
+                            ruleValue = str(6 - listOfList.index(i))
+                        self.file.write(nodeA + ' -- ' + nodeB + "[label= R" + ruleValue + "];\n")
                 closed.append(myState.state)
-    print("")
 
+    print("")
 
     def backtracking(self, goal):
         """iterative Backtracking"""
@@ -161,12 +183,14 @@ class Node:
             if jugA == goal:
                 print("open: ", stack)
                 print("closed: ", closed)
+                self.writeSolutionToFile(path)
                 self.file.write('}')
                 self.file.close()
                 return path
             else:
-                myState = Node(node)
+                myState = Node(node, self.ascendingOrder)
                 listOfList = myState.applyOperators(visited=[])
+                listOfList = self.applyReorderningRules(listOfList)
                 for i in listOfList:
                     if i and i not in path:
                         newPath = list(path)
@@ -175,5 +199,10 @@ class Node:
                         closed.append(myState.state)
                         nodeA = str(node[0]) + "." + str(node[1])
                         nodeB = str(i[0]) + "." + str(i[1])
-                        self.file.write(nodeA + ' -- ' + nodeB + ";")
+                        if self.ascendingOrder == "asc":
+                            ruleValue = str(listOfList.index(i) + 1)
+                        else:
+                            ruleValue = str(6 - listOfList.index(i))
+                        self.file.write(nodeA + ' -- ' + nodeB + "[label= R" + ruleValue + "];\n")
                         break
+
