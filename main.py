@@ -29,7 +29,7 @@ def choiceOrder():
 def main():
     algorithm = choiceAlgorithm()
     order = choiceOrder()
-    while choiceAlgorithm != 4:
+    while algorithm != 4:
         if algorithm == 1:
             print("BFS")
             node1 = Node([0, 0], order)
@@ -52,13 +52,25 @@ def main():
 
 
 def openGraph():
+    command = " dot -Tpng graph.dot -o graph.png"
+    res = os.system(command)
     if platform.system() == 'Darwin':  # macOS
         subprocess.call(('open', "graph.dot"))
+        if os.path.isfile("graph.png"):
+            subprocess.call(('open', "graph.png"))
     elif platform.system() == 'Windows':  # Windows
         os.startfile("graph.dot")
+        if os.path.isfile("graph.png"):
+            os.startfile("graph.png")
     else:  # linux variants
         subprocess.call(('xdg-open', "graph.dot"))
+        if os.path.isfile("graph.png"):
+            subprocess.call(('xdg-open', "graph.png"))
+
+    print(res)
 
 
 if __name__ == '__main__':
+    print("NOTE: the graph generated is in the file graph.dot")
+    print("NOTE: if installed graphviz, the graph is also generated in the file graph.png")
     main()
