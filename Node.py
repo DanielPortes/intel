@@ -79,7 +79,6 @@ class Node:
 
     def BFS(self, goal):
         """Breadth First Search"""
-        # write dot file graphviz format
         queue = []
         queue.append([self.state])
         visited = []
@@ -156,7 +155,7 @@ class Node:
         while stack:
             path = stack.pop()
             node = path[-1]
-            print("node: ", node)
+            # print("node: ", node)
             jugA = node[0]
 
             if jugA == goal:
