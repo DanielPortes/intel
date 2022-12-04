@@ -90,36 +90,33 @@ class Node:
         visited = []
         closed = []
         open = [[self.state]]
+        current = []
         while queue:
             path = queue.pop(0)
             open.pop(0)
             node = path[-1]
             jugA = node[0]
+            current.append(node)
 
             if jugA == goal:
                 print("open: ", open)
                 print("closed: ", closed)
+                print("current: ", current)
                 self.writeSolutionToFile(path)
                 self.file.write('}')
                 self.file.close()
                 return path
             else:
                 myState = Node(node, self.ascendingOrder)
-                listOfList = myState.applyOperators(visited)
-                listOfList = self.applyReorderningRules(listOfList)
-                for i in listOfList:
+                listOp = myState.applyOperators(visited)
+                listOp = self.applyReorderningRules(listOp)
+                for i in listOp:
                     if i and i not in path:
                         newPath = list(path)
                         newPath.append(i)
                         queue.append(newPath)
                         open.append(i)
-                        nodeA = str(node[0]) + "." + str(node[1])
-                        nodeB = str(i[0]) + "." + str(i[1])
-                        if self.ascendingOrder == "asc":
-                            ruleValue = str(listOfList.index(i) + 1)
-                        else:
-                            ruleValue = str(6 - listOfList.index(i))
-                        self.file.write(nodeA + ' -- ' + nodeB + "[label= R" + ruleValue + "];\n")
+                        self.writeEdges(node, i, listOp.index(i))
                 closed.append(myState.state)
 
     def applyReorderningRules(self, listOfList):
@@ -135,36 +132,33 @@ class Node:
         visited = []
         closed = []
         open = [[self.state]]
+        current = []
         while stack:
             path = stack.pop()
             open.pop()
             node = path[-1]
             jugA = node[0]
+            current.append(node)
 
             if jugA == goal:
                 print("open: ", open)
                 print("closed: ", closed)
+                print("current: ", current)
                 self.writeSolutionToFile(path)
                 self.file.write('}')
                 self.file.close()
                 return path
             else:
                 myState = Node(node, self.ascendingOrder)
-                listOfList = myState.applyOperators(visited)
-                listOfList = self.applyReorderningRules(listOfList)
-                for i in listOfList:
+                listOp = myState.applyOperators(visited)
+                listOp = self.applyReorderningRules(listOp)
+                for i in listOp:
                     if i and i not in path:
                         newPath = list(path)
                         newPath.append(i)
                         stack.append(newPath)
                         open.append(i)
-                        nodeA = str(node[0]) + "." + str(node[1])
-                        nodeB = str(i[0]) + "." + str(i[1])
-                        if self.ascendingOrder == "asc":
-                            ruleValue = str(listOfList.index(i) + 1)
-                        else:
-                            ruleValue = str(6 - listOfList.index(i))
-                        self.file.write(nodeA + ' -- ' + nodeB + "[label= R" + ruleValue + "];\n")
+                        self.writeEdges(node, i, listOp.index(i))
                 closed.append(myState.state)
 
     print("")
@@ -174,35 +168,39 @@ class Node:
         stack = []
         stack.append([self.state])
         closed = []
+        current = []
         while stack:
             path = stack.pop()
             node = path[-1]
-            # print("node: ", node)
             jugA = node[0]
-
+            current.append(node)
             if jugA == goal:
                 print("open: ", stack)
                 print("closed: ", closed)
+                print("current: ", current)
                 self.writeSolutionToFile(path)
                 self.file.write('}')
                 self.file.close()
                 return path
             else:
                 myState = Node(node, self.ascendingOrder)
-                listOfList = myState.applyOperators(visited=[])
-                listOfList = self.applyReorderningRules(listOfList)
-                for i in listOfList:
+                listOp = myState.applyOperators(visited=[])
+                listOp = self.applyReorderningRules(listOp)
+                for i in listOp:
                     if i and i not in path:
                         newPath = list(path)
                         newPath.append(i)
                         stack.append(newPath)
                         closed.append(myState.state)
-                        nodeA = str(node[0]) + "." + str(node[1])
-                        nodeB = str(i[0]) + "." + str(i[1])
-                        if self.ascendingOrder == "asc":
-                            ruleValue = str(listOfList.index(i) + 1)
-                        else:
-                            ruleValue = str(6 - listOfList.index(i))
-                        self.file.write(nodeA + ' -- ' + nodeB + "[label= R" + ruleValue + "];\n")
+                        self.writeEdges(node, i, listOp.index(i))
                         break
+
+    def writeEdges(self, nodeA, nodeB, index):
+        valueAToWrite = str(nodeA[0]) + "." + str(nodeA[1])
+        valueBToWrite = str(nodeB[0]) + "." + str(nodeB[1])
+        if self.ascendingOrder == "asc":
+            corretRuleValue = (str(index + 1))
+        else:
+            corretRuleValue = str(6 - index)
+        self.file.write(valueAToWrite + ' -- ' + valueBToWrite + "[label= R" + corretRuleValue + "];\n")
 
