@@ -6,8 +6,7 @@ class Node:
         self.capacityJugA = 5
         self.capacityJugB = 3
 
-        self.ascendingOrder = order
-        self.ascendingOrder.lower()
+        self.orderRules = order
         # pura gambiarra isso, nao consegui fazer dentro de cada metodo, erro de 'compilacao'
         self.file = open('graph.dot', 'w')
         self.file.write('strict graph G {\n')
@@ -82,7 +81,8 @@ class Node:
         self.file.write("subgraph Solution {\n")
         for i in path:
             self.file.write(str(i[0]) + "." + str(i[1]) + " [color=red];\n")
-        self.file.write("}\n")
+        self.file.write("\n}\n}\n")
+        self.file.close()
     def BFS(self, goal):
         """Breadth First Search"""
         queue = []
@@ -103,24 +103,23 @@ class Node:
                 print("closed: ", closed)
                 print("current: ", current)
                 self.writeSolutionToFile(path)
-                self.file.write('}')
-                self.file.close()
+
                 return path
             else:
-                myState = Node(node, self.ascendingOrder)
-                listOp = myState.applyOperators(visited)
-                listOp = self.applyReorderningRules(listOp)
-                for i in listOp:
+                myState = Node(node, self.orderRules)
+                states = myState.applyOperators(visited)
+                states = self.applyReorderningRules(states)
+                for i in states:
                     if i and i not in path:
                         newPath = list(path)
                         newPath.append(i)
                         queue.append(newPath)
                         open.append(i)
-                        self.writeEdges(node, i, listOp.index(i))
+                        self.writeEdgesToGraphviz(node, i, states.index(i))
                 closed.append(myState.state)
 
     def applyReorderningRules(self, listOfList):
-        if not (self.ascendingOrder == "asc"):
+        if not (self.orderRules == "asc"):
             listOfList.reverse()
         return listOfList
 
@@ -145,11 +144,9 @@ class Node:
                 print("closed: ", closed)
                 print("current: ", current)
                 self.writeSolutionToFile(path)
-                self.file.write('}')
-                self.file.close()
                 return path
             else:
-                myState = Node(node, self.ascendingOrder)
+                myState = Node(node, self.orderRules)
                 listOp = myState.applyOperators(visited)
                 listOp = self.applyReorderningRules(listOp)
                 for i in listOp:
@@ -158,10 +155,8 @@ class Node:
                         newPath.append(i)
                         stack.append(newPath)
                         open.append(i)
-                        self.writeEdges(node, i, listOp.index(i))
+                        self.writeEdgesToGraphviz(node, i, listOp.index(i))
                 closed.append(myState.state)
-
-    print("")
 
     def backtracking(self, goal):
         """iterative Backtracking"""
@@ -179,11 +174,9 @@ class Node:
                 print("closed: ", closed)
                 print("current: ", current)
                 self.writeSolutionToFile(path)
-                self.file.write('}')
-                self.file.close()
                 return path
             else:
-                myState = Node(node, self.ascendingOrder)
+                myState = Node(node, self.orderRules)
                 listOp = myState.applyOperators(visited=[])
                 listOp = self.applyReorderningRules(listOp)
                 for i in listOp:
@@ -192,15 +185,54 @@ class Node:
                         newPath.append(i)
                         stack.append(newPath)
                         closed.append(myState.state)
-                        self.writeEdges(node, i, listOp.index(i))
+                        self.writeEdgesToGraphviz(node, i, listOp.index(i))
                         break
 
-    def writeEdges(self, nodeA, nodeB, index):
+    def writeEdgesToGraphviz(self, nodeA, nodeB, index):
         valueAToWrite = str(nodeA[0]) + "." + str(nodeA[1])
         valueBToWrite = str(nodeB[0]) + "." + str(nodeB[1])
-        if self.ascendingOrder == "asc":
+        if self.orderRules == "asc":
             corretRuleValue = (str(index + 1))
         else:
             corretRuleValue = str(6 - index)
         self.file.write(valueAToWrite + ' -- ' + valueBToWrite + "[label= R" + corretRuleValue + "];\n")
 
+
+    def writeNodesToGraphviz(self, node, index):
+        valueAToWrite = str(node[0]) + "." + str(node[1])
+        self.file.write(valueAToWrite + ' [label= "' + valueAToWrite + '"];\n')
+
+    def uniformCostSearch(self, goal):
+        """Uniform Cost Search"""
+        queue = [[self.state]]
+        visited = []
+        closed = []
+        open = [[self.state]]
+        current = []
+
+        while queue:
+            path = queue.pop(0)
+            open.pop(0) 
+            node = path[-1] 
+            jugA = node[0]
+            current.append(node)
+            if jugA == goal:
+                print("open: ", open)
+                print("closed: ", closed)
+                print("current: ", current)
+                self.writeSolutionToFile(path)
+                return path
+            else:
+                currentState = Node(node, self.orderRules)
+                states = currentState.applyOperators(visited)
+                states = self.applyReorderningRules(states)
+                for i in states:
+                    if i and i not in path:
+                        newPath = list(path)
+                        newPath.append(i)
+                        queue.append(newPath)
+                        open.append(i)
+                        self.writeEdgesToGraphviz(node, i, states.index(i))
+                closed.append(currentState.state)
+                queue.sort(key=lambda x: sum([sum(i) for i in x]))
+                print("")

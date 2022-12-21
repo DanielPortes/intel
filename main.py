@@ -1,12 +1,12 @@
 from Node import Node
 import subprocess, os, platform
 
-
 def choiceAlgorithm():
     print("1. BFS")
     print("2. DFS")
     print("3. Backtracking")
-    print("4. Exit")
+    print("4. Uniform Cost Search")
+    print("5. Exit")
     print("Enter your choice: ", end="")
     choice = int(input())
     return choice
@@ -27,9 +27,9 @@ def choiceOrder():
 
 
 def main():
-    algorithm = choiceAlgorithm()
-    order = choiceOrder()
-    while algorithm != 4:
+    while True:
+        algorithm = choiceAlgorithm()
+        order = choiceOrder()
         if algorithm == 1:
             print("BFS")
             node1 = Node([0, 0], order)
@@ -45,10 +45,14 @@ def main():
             node3 = Node([0, 0], order)
             print("Solution: " + str(node3.backtracking(1)) + "\n")
             openGraph()
+        elif algorithm == 4:
+            print("Uniform Cost Search")
+            node4 = Node([0, 0], order)
+            print("Solution: " + str(node4.uniformCostSearch(1)) + "\n")
+            openGraph()
         else:
-            print("Invalid choice")
-        algorithm = choiceAlgorithm()
-        order = choiceOrder()
+            break
+
 
 
 def openGraph():
