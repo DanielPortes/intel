@@ -6,7 +6,8 @@ def choiceAlgorithm():
     print("2. DFS")
     print("3. Backtracking")
     print("4. Uniform Cost Search")
-    print("5. Exit")
+    print("5. Greedy Search")
+    print("6. Exit")
     print("Enter your choice: ", end="")
     choice = int(input())
     return choice
@@ -49,6 +50,11 @@ def main():
             print("Uniform Cost Search")
             node4 = Node([0, 0], order)
             print("Solution: " + str(node4.uniformCostSearch(1)) + "\n")
+            openGraph()
+        elif algorithm == 5:
+            print("Greedy Search")
+            node5 = Node([0, 0], order)
+            print("Solution: " + str(node5.GreedySearchy(1)) + "\n")
             openGraph()
         else:
             break

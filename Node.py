@@ -10,6 +10,16 @@ class Node:
         # pura gambiarra isso, nao consegui fazer dentro de cada metodo, erro de 'compilacao'
         self.file = open('graph.dot', 'w')
         self.file.write('strict graph G {\n')
+        
+        # Valores da função heurística - Ordem da função aplicada: Valor da função Heuristica
+        self.heuristicValues = {
+            0: 0, # fillA
+            1: 2, # fillB
+            2: 5, # emptyA
+            3: 3, # emptyB
+            4: 1, # pourAtoB
+            5: 2  # pourBtoA
+        }
 
     def fillA(self, visited):
         if self.state[0] < self.capacityJugA and ([self.capacityJugA, self.state[1]] not in visited):
@@ -83,6 +93,7 @@ class Node:
             self.file.write(str(i[0]) + "." + str(i[1]) + " [color=red];\n")
         self.file.write("\n}\n}\n")
         self.file.close()
+
     def BFS(self, goal):
         """Breadth First Search"""
         queue = []
@@ -122,6 +133,19 @@ class Node:
         if not (self.orderRules == "asc"):
             listOfList.reverse()
         return listOfList
+
+    def applySortByHeuristic(self, listOfList):
+        sortedHeuristicByValues = []
+        sortedList = []
+        for i in sorted(self.heuristicValues, key = self.heuristicValues.get):
+            sortedHeuristicByValues.append(i)
+        
+        for i in range(len(listOfList)):
+            sortedList.append(listOfList[sortedHeuristicByValues[i]])
+
+        return sortedList
+
+        
 
     def DFS(self, goal):
         """Depth First Search"""
@@ -236,3 +260,41 @@ class Node:
                 closed.append(currentState.state)
                 queue.sort(key=lambda x: sum([sum(i) for i in x]))
                 print("")
+        
+    def GreedySearchy(self, goal):
+        """Greedy Search"""
+        queue = []
+        queue.append([self.state])
+        visited = []
+        closed = []
+        open = [[self.state]]
+        current = []
+        cont = 0
+
+        while queue:
+            cont = cont +1
+            path = queue.pop(0)
+            open.pop(0)
+            node = path[-1]
+            jugA = node[0]
+            current.append(node)
+
+            if jugA == goal:
+                print("open: ", open)
+                print("closed: ", closed)
+                print("current: ", current)
+                self.writeSolutionToFile(path)
+
+                return path
+            else:
+                myState = Node(node, self.orderRules)
+                states = myState.applyOperators(visited)
+                sortedStates = self.applySortByHeuristic(states)
+                for i in sortedStates:
+                    if i and i not in path:
+                        newPath = list(path)
+                        newPath.append(i)
+                        queue.append(newPath)
+                        open.append(i)
+                        self.writeEdgesToGraphviz(node, i, sortedStates.index(i))
+                closed.append(myState.state)
