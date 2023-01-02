@@ -10,15 +10,15 @@ class Node:
         # pura gambiarra isso, nao consegui fazer dentro de cada metodo, erro de 'compilacao'
         self.file = open('graph.dot', 'w')
         self.file.write('strict graph G {\n')
-        
+
         # Valores da função heurística - Ordem da função aplicada: Valor da função Heuristica
         self.heuristicValues = {
             0: 0, # fillA
-            1: 2, # fillB
-            2: 5, # emptyA
-            3: 3, # emptyB
-            4: 1, # pourAtoB
-            5: 2  # pourBtoA
+            1: 0, # fillB
+            2: 0, # emptyA
+            3: 0, # emptyB
+            4: 0, # pourAtoB
+            5: 0  # pourBtoA
         }
 
     def fillA(self, visited):
@@ -134,12 +134,21 @@ class Node:
             listOfList.reverse()
         return listOfList
 
+    def calculateHeuristicValues(self,currentState):
+        if(currentState):
+            return abs(currentState[0] - 1)
+        else:
+            return 10000
+
     def applySortByHeuristic(self, listOfList):
+        for i in range(len(listOfList)):
+            self.heuristicValues[i] = self.calculateHeuristicValues(listOfList[i])
+
         sortedHeuristicByValues = []
         sortedList = []
         for i in sorted(self.heuristicValues, key = self.heuristicValues.get):
             sortedHeuristicByValues.append(i)
-        
+
         for i in range(len(listOfList)):
             sortedList.append(listOfList[sortedHeuristicByValues[i]])
 
