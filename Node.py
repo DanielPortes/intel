@@ -1,3 +1,19 @@
+import os
+import sys
+from datetime import datetime
+
+
+def timestamp():
+    return datetime.now().strftime('_%m-%d__%H-%M-%S')
+
+def printLists(open, closed, current, cost=None):
+    print("open: ", open)
+    print("closed: ", closed)
+    print("current: ", current)
+    if cost:
+        print("cost: ", cost)
+
+
 class Node:
     """A node state for water jug problem"""
 
@@ -7,19 +23,6 @@ class Node:
         self.capacityJugB = 3
 
         self.orderRules = order
-        # pura gambiarra isso, nao consegui fazer dentro de cada metodo, erro de 'compilacao'
-        self.file = open('graph.dot', 'w')
-        self.file.write('strict graph G {\n')
-
-        # Valores da função heurística - Ordem da função aplicada: Valor da função Heuristica
-        self.heuristicValues = {
-            0: 0, # fillA
-            1: 0, # fillB
-            2: 0, # emptyA
-            3: 0, # emptyB
-            4: 0, # pourAtoB
-            5: 0  # pourBtoA
-        }
 
     def fillA(self, visited):
         if self.state[0] < self.capacityJugA and ([self.capacityJugA, self.state[1]] not in visited):
@@ -52,13 +55,13 @@ class Node:
     def pourAtoB(self, visited):
         if self.state[0] > 0 and self.state[1] < self.capacityJugB:
             if self.state[0] + self.state[1] <= self.capacityJugB:
-                if ([0, self.state[0] + self.state[1]] not in visited):
+                if [0, self.state[0] + self.state[1]] not in visited:
                     visited.append([0, self.state[0] + self.state[1]])
                     return [0, self.state[0] + self.state[1]]
                 else:
                     return None
             else:
-                if ([self.state[0] - (self.capacityJugB - self.state[1]), self.capacityJugB] not in visited):
+                if [self.state[0] - (self.capacityJugB - self.state[1]), self.capacityJugB] not in visited:
                     visited.append([self.state[0] - (self.capacityJugB - self.state[1]), self.capacityJugB])
                     return [self.state[0] - (self.capacityJugB - self.state[1]), self.capacityJugB]
                 else:
@@ -69,13 +72,13 @@ class Node:
     def pourBtoA(self, visited):
         if self.state[1] > 0 and self.state[0] < self.capacityJugA:
             if self.state[0] + self.state[1] <= self.capacityJugA:
-                if ([self.state[0] + self.state[1], 0] not in visited):
+                if [self.state[0] + self.state[1], 0] not in visited:
                     visited.append([self.state[0] + self.state[1], 0])
                     return [self.state[0] + self.state[1], 0]
                 else:
                     return None
             else:
-                if ([self.capacityJugA, self.state[1] - (self.capacityJugA - self.state[0])] not in visited):
+                if [self.capacityJugA, self.state[1] - (self.capacityJugA - self.state[0])] not in visited:
                     visited.append([self.capacityJugA, self.state[1] - (self.capacityJugA - self.state[0])])
                     return [self.capacityJugA, self.state[1] - (self.capacityJugA - self.state[0])]
                 else:
@@ -88,31 +91,38 @@ class Node:
                 self.pourAtoB(visited), self.pourBtoA(visited)]
 
     def writeSolutionToFile(self, path):
-        self.file.write("subgraph Solution {\n")
+        self.file.write("\n\tsubgraph Solution {\n")
         for i in path:
-            self.file.write(str(i[0]) + "." + str(i[1]) + " [color=red];\n")
-        self.file.write("\n}\n}\n")
+            self.file.write("\t" + str(i[0]) + "." + str(i[1]) + " [color=red];\n")
+        self.file.write("\t}\n}\n")
         self.file.close()
+
+    def createGraphvizFile(self, title):
+        if not os.path.exists("output"):
+            os.makedirs("output")
+        self.file = open('./output/graph' + str(timestamp()) + '.dot', 'w')
+        self.file.write('strict graph G {\n')
+        self.file.write("labelloc=\"t\";\n"
+                        "label=\"" + title + ": " + self.orderRules + "\";\n\n")
 
     def BFS(self, goal):
         """Breadth First Search"""
-        queue = []
-        queue.append([self.state])
+        self.createGraphvizFile("Breadth First Search")
+        queue = [[self.state]]
         visited = []
         closed = []
         open = [[self.state]]
         current = []
         while queue:
             path = queue.pop(0)
-            open.pop(0)
             node = path[-1]
             jugA = node[0]
+
+            open.pop(0)
             current.append(node)
 
             if jugA == goal:
-                print("open: ", open)
-                print("closed: ", closed)
-                print("current: ", current)
+                printLists(open, closed, current)
                 self.writeSolutionToFile(path)
 
                 return path
@@ -130,35 +140,13 @@ class Node:
                 closed.append(myState.state)
 
     def applyReorderningRules(self, listOfList):
-        if not (self.orderRules == "asc"):
+        if not (self.orderRules == "Ascendant"):
             listOfList.reverse()
         return listOfList
 
-    def calculateHeuristicValues(self,currentState):
-        if(currentState):
-            return abs(currentState[0] - 1)
-        else:
-            return 10000
-
-    def applySortByHeuristic(self, listOfList):
-        for i in range(len(listOfList)):
-            self.heuristicValues[i] = self.calculateHeuristicValues(listOfList[i])
-
-        sortedHeuristicByValues = []
-        sortedList = []
-        for i in sorted(self.heuristicValues, key = self.heuristicValues.get):
-            sortedHeuristicByValues.append(i)
-
-        for i in range(len(listOfList)):
-            sortedList.append(listOfList[sortedHeuristicByValues[i]])
-
-        return sortedList
-
-        
-
     def DFS(self, goal):
         """Depth First Search"""
-
+        self.createGraphvizFile("Depth First Search")
         stack = []
         stack.append([self.state])
         visited = []
@@ -173,9 +161,7 @@ class Node:
             current.append(node)
 
             if jugA == goal:
-                print("open: ", open)
-                print("closed: ", closed)
-                print("current: ", current)
+                printLists(open, closed, current)
                 self.writeSolutionToFile(path)
                 return path
             else:
@@ -193,6 +179,7 @@ class Node:
 
     def backtracking(self, goal):
         """iterative Backtracking"""
+        self.createGraphvizFile("Iterative Backtracking")
         stack = []
         stack.append([self.state])
         closed = []
@@ -203,9 +190,7 @@ class Node:
             jugA = node[0]
             current.append(node)
             if jugA == goal:
-                print("open: ", stack)
-                print("closed: ", closed)
-                print("current: ", current)
+                printLists(stack, closed, current)
                 self.writeSolutionToFile(path)
                 return path
             else:
@@ -224,19 +209,47 @@ class Node:
     def writeEdgesToGraphviz(self, nodeA, nodeB, index):
         valueAToWrite = str(nodeA[0]) + "." + str(nodeA[1])
         valueBToWrite = str(nodeB[0]) + "." + str(nodeB[1])
-        if self.orderRules == "asc":
+        if self.orderRules == "Ascendant":
             corretRuleValue = (str(index + 1))
         else:
             corretRuleValue = str(6 - index)
         self.file.write(valueAToWrite + ' -- ' + valueBToWrite + "[label= R" + corretRuleValue + "];\n")
 
+    def realCost(self, path):
+        if len(sys.argv) > 1:
+            if "-c2" in sys.argv:
+                return self.costAlt(path)
+        return self.cost(path)
 
-    def writeNodesToGraphviz(self, node, index):
-        valueAToWrite = str(node[0]) + "." + str(node[1])
-        self.file.write(valueAToWrite + ' [label= "' + valueAToWrite + '"];\n')
+    def cost(self, path):
+        cost = 0
+        for i in path[1:]:
+            cost += abs(i[0] - 1)
+        return cost
+
+    def costAlt(self, path):
+        cost = 0
+        for i in path[1:]:
+            cost += abs(i[0] + i[1] - 1)
+        return cost
+
+    def heValues(self, path):
+        if len(sys.argv) > 1:
+            if "-h2" in sys.argv:
+                return self.heuristicAlt(path)
+        return self.heuristic(path)
+
+    def heuristic(self, path):
+        heuristic = abs(5 - path[-1][0]) + abs(3 - path[-1][1])
+        return heuristic
+
+    def heuristicAlt(self, path):
+        heuristic = abs(5 - path[-1][0] + 1) + abs(3 - path[-1][1] + 1)
+        return heuristic
 
     def uniformCostSearch(self, goal):
         """Uniform Cost Search"""
+        self.createGraphvizFile("Uniform Cost Search")
         queue = [[self.state]]
         visited = []
         closed = []
@@ -245,65 +258,99 @@ class Node:
 
         while queue:
             path = queue.pop(0)
-            open.pop(0) 
-            node = path[-1] 
-            jugA = node[0]
-            current.append(node)
+            open.pop(0)
+            state = path[-1]
+            jugA = state[0]
+            current.append(state)
             if jugA == goal:
-                print("open: ", open)
-                print("closed: ", closed)
-                print("current: ", current)
+                printLists(open, closed, current, self.realCost(path))
                 self.writeSolutionToFile(path)
                 return path
             else:
-                currentState = Node(node, self.orderRules)
+                currentState = Node(state, self.orderRules)
                 states = currentState.applyOperators(visited)
                 states = self.applyReorderningRules(states)
+
                 for i in states:
                     if i and i not in path:
                         newPath = list(path)
                         newPath.append(i)
                         queue.append(newPath)
                         open.append(i)
-                        self.writeEdgesToGraphviz(node, i, states.index(i))
+                        self.writeEdgesToGraphviz(state, i, states.index(i))
+                queue = sorted(queue, key=lambda path: self.realCost(path))
                 closed.append(currentState.state)
-                queue.sort(key=lambda x: sum([sum(i) for i in x]))
-                print("")
-        
+
     def GreedySearchy(self, goal):
         """Greedy Search"""
+        self.createGraphvizFile("Greedy Search")
         queue = []
         queue.append([self.state])
         visited = []
         closed = []
         open = [[self.state]]
         current = []
-        cont = 0
 
         while queue:
-            cont = cont +1
             path = queue.pop(0)
             open.pop(0)
-            node = path[-1]
-            jugA = node[0]
-            current.append(node)
+            state = path[-1]
+            jugA = state[0]
+            current.append(state)
 
             if jugA == goal:
-                print("open: ", open)
-                print("closed: ", closed)
-                print("current: ", current)
+                printLists(open, closed, current, self.realCost(path))
                 self.writeSolutionToFile(path)
-
                 return path
             else:
-                myState = Node(node, self.orderRules)
-                states = myState.applyOperators(visited)
-                sortedStates = self.applySortByHeuristic(states)
-                for i in sortedStates:
+                currentState = Node(state, self.orderRules)
+                states = currentState.applyOperators(visited)
+                states = self.applyReorderningRules(states)
+
+                for i in states:
                     if i and i not in path:
                         newPath = list(path)
                         newPath.append(i)
                         queue.append(newPath)
                         open.append(i)
-                        self.writeEdgesToGraphviz(node, i, sortedStates.index(i))
-                closed.append(myState.state)
+                        self.writeEdgesToGraphviz(state, i, states.index(i))
+
+                queue = sorted(queue, key=lambda path: self.heValues(path))
+                closed.append(currentState.state)
+
+    def AStarSearch(self, goal):
+        """A* Search"""
+        self.createGraphvizFile("A* Search")
+        queue = []
+        queue.append([self.state])
+        visited = []
+        closed = []
+        open = [[self.state]]
+        current = []
+
+        while queue:
+            path = queue.pop(0)
+            open.pop(0)
+            state = path[-1]
+            jugA = state[0]
+            current.append(state)
+
+            if jugA == goal:
+                printLists(open, closed, current, self.realCost(path))
+                self.writeSolutionToFile(path)
+                return path
+            else:
+                currentState = Node(state, self.orderRules)
+                states = currentState.applyOperators(visited)
+                states = self.applyReorderningRules(states)
+
+                for i in states:
+                    if i and i not in path:
+                        newPath = list(path)
+                        newPath.append(i)
+                        queue.append(newPath)
+                        open.append(i)
+                        self.writeEdgesToGraphviz(state, i, states.index(i))
+
+                queue = sorted(queue, key=lambda path: (self.realCost(path)) + self.heValues(path))
+                closed.append(currentState.state)
