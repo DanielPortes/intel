@@ -6,12 +6,17 @@ from datetime import datetime
 def timestamp():
     return datetime.now().strftime('_%m-%d__%H-%M-%S')
 
+
 def printLists(open, closed, current, cost=None):
     print("open: ", open)
     print("closed: ", closed)
     print("current: ", current)
     if cost:
         print("cost: ", cost)
+
+
+def getFirstLetters(string):
+    return ''.join([word[0] for word in string.split()])
 
 
 class Node:
@@ -100,7 +105,10 @@ class Node:
     def createGraphvizFile(self, title):
         if not os.path.exists("output"):
             os.makedirs("output")
-        self.file = open('./output/graph' + str(timestamp()) + '.dot', 'w')
+
+        self.file = open(
+            "./output/graph" + "-(" + getFirstLetters(title) + "," + self.orderRules + ")" + str(timestamp()) + ".dot",
+            "w")
         self.file.write('strict graph G {\n')
         self.file.write("labelloc=\"t\";\n"
                         "label=\"" + title + ": " + self.orderRules + "\";\n\n")
