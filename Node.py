@@ -119,15 +119,14 @@ class Node:
         queue = [[self.state]]
         visited = []
         closed = []
-        open = [[self.state]]
+        open = [self.state]
         current = []
         while queue:
             path = queue.pop(0)
-            node = path[-1]
-            jugA = node[0]
-
-            open.pop(0)
-            current.append(node)
+            state = path[-1]
+            jugA = state[0]
+            open.remove(state)
+            current.append(state)
 
             if jugA == goal:
                 printLists(open, closed, current)
@@ -135,7 +134,7 @@ class Node:
 
                 return path
             else:
-                myState = Node(node, self.orderRules)
+                myState = Node(state, self.orderRules)
                 states = myState.applyOperators(visited)
                 states = self.applyReorderningRules(states)
                 for i in states:
@@ -144,7 +143,7 @@ class Node:
                         newPath.append(i)
                         queue.append(newPath)
                         open.append(i)
-                        self.writeEdgesToGraphviz(node, i, states.index(i))
+                        self.writeEdgesToGraphviz(state, i, states.index(i))
                 closed.append(myState.state)
 
     def applyReorderningRules(self, listOfList):
@@ -159,21 +158,21 @@ class Node:
         stack.append([self.state])
         visited = []
         closed = []
-        open = [[self.state]]
+        open = [self.state]
         current = []
         while stack:
             path = stack.pop()
-            open.pop()
-            node = path[-1]
-            jugA = node[0]
-            current.append(node)
+            state = path[-1]
+            open.remove(state)
+            jugA = state[0]
+            current.append(state)
 
             if jugA == goal:
                 printLists(open, closed, current)
                 self.writeSolutionToFile(path)
                 return path
             else:
-                myState = Node(node, self.orderRules)
+                myState = Node(state, self.orderRules)
                 listOp = myState.applyOperators(visited)
                 listOp = self.applyReorderningRules(listOp)
                 for i in listOp:
@@ -182,7 +181,7 @@ class Node:
                         newPath.append(i)
                         stack.append(newPath)
                         open.append(i)
-                        self.writeEdgesToGraphviz(node, i, listOp.index(i))
+                        self.writeEdgesToGraphviz(state, i, listOp.index(i))
                 closed.append(myState.state)
 
     def backtracking(self, goal):
@@ -261,13 +260,13 @@ class Node:
         queue = [[self.state]]
         visited = []
         closed = []
-        open = [[self.state]]
+        open = [self.state]
         current = []
 
         while queue:
             path = queue.pop(0)
-            open.pop(0)
             state = path[-1]
+            open.remove(state)
             jugA = state[0]
             current.append(state)
             if jugA == goal:
@@ -296,13 +295,13 @@ class Node:
         queue.append([self.state])
         visited = []
         closed = []
-        open = [[self.state]]
+        open = [self.state]
         current = []
 
         while queue:
             path = queue.pop(0)
-            open.pop(0)
             state = path[-1]
+            open.remove(state)
             jugA = state[0]
             current.append(state)
 
@@ -333,15 +332,15 @@ class Node:
         queue.append([self.state])
         visited = []
         closed = []
-        open = [[self.state]]
+        open = [self.state]
         current = []
 
         while queue:
             path = queue.pop(0)
-            open.pop(0)
             state = path[-1]
             jugA = state[0]
             current.append(state)
+            open.remove(state)
 
             if jugA == goal:
                 printLists(open, closed, current, self.realCost(path))
@@ -358,6 +357,8 @@ class Node:
                         newPath.append(i)
                         queue.append(newPath)
                         open.append(i)
+                        if i== [4, 3]:
+                            print("oi")
                         self.writeEdgesToGraphviz(state, i, states.index(i))
 
                 queue = sorted(queue, key=lambda path: (self.realCost(path)) + self.heValues(path))
