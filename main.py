@@ -42,22 +42,22 @@ def main():
         order = choiceOrder()
         node = Node([0, 0], order)
         if algorithm == 1:
-            print("BFS")
+            print("\nBFS: " + order)
             print("Solution: ", str(node.BFS(1)) + "\n")
         elif algorithm == 2:
-            print("DFS")
+            print("\nDFS: " + order)
             print("Solution: ", str(node.DFS(1)) + "\n")
         elif algorithm == 3:
-            print("Backtracking")
+            print("\nBacktracking: " + order)
             print("Solution: " + str(node.backtracking(1)) + "\n")
         elif algorithm == 4:
-            print("Uniform Cost Search")
+            print("\nUniform Cost Search: " + order)
             print("Solution: " + str(node.uniformCostSearch(1)) + "\n")
         elif algorithm == 5:
-            print("Greedy Search")
+            print("\nGreedy Search: " + order)
             print("Solution: " + str(node.GreedySearchy(1)) + "\n")
         elif algorithm == 6:
-            print("A* Search")
+            print("\nA* Search: " + order)
             print("Solution: " + str(node.AStarSearch(1)) + "\n")
         openGraph()
 
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
     message = f"""NOTE: the graph file created is like .output/graph_{datetime.datetime.today():_%m-%d__%H-%M-%S}.dot
 NOTE: if installed graphviz, the graph is also generated in the file with the same name + .png
- 
+
 Optional arguments:
   -s    to not open the graph after create it
   -h2   to change the heuristic function

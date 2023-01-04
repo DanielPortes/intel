@@ -125,7 +125,6 @@ class Node:
             path = queue.pop(0)
             state = path[-1]
             jugA = state[0]
-            open.remove(state)
             current.append(state)
 
             if jugA == goal:
@@ -144,6 +143,8 @@ class Node:
                         queue.append(newPath)
                         open.append(i)
                         self.writeEdgesToGraphviz(state, i, states.index(i))
+
+                open.remove(state)
                 closed.append(myState.state)
 
     def applyReorderningRules(self, listOfList):
@@ -163,7 +164,6 @@ class Node:
         while stack:
             path = stack.pop()
             state = path[-1]
-            open.remove(state)
             jugA = state[0]
             current.append(state)
 
@@ -182,6 +182,8 @@ class Node:
                         stack.append(newPath)
                         open.append(i)
                         self.writeEdgesToGraphviz(state, i, listOp.index(i))
+
+                open.remove(state)
                 closed.append(myState.state)
 
     def backtracking(self, goal):
@@ -266,7 +268,6 @@ class Node:
         while queue:
             path = queue.pop(0)
             state = path[-1]
-            open.remove(state)
             jugA = state[0]
             current.append(state)
             if jugA == goal:
@@ -274,19 +275,20 @@ class Node:
                 self.writeSolutionToFile(path)
                 return path
             else:
-                currentState = Node(state, self.orderRules)
-                states = currentState.applyOperators(visited)
+                currentNode = Node(state, self.orderRules)
+                states = currentNode.applyOperators(visited)
                 states = self.applyReorderningRules(states)
 
                 for i in states:
                     if i and i not in path:
-                        newPath = list(path)
-                        newPath.append(i)
+                        newPath = path + [i]
                         queue.append(newPath)
                         open.append(i)
                         self.writeEdgesToGraphviz(state, i, states.index(i))
+
+                open.remove(state)
                 queue = sorted(queue, key=lambda path: self.realCost(path))
-                closed.append(currentState.state)
+                closed.append(currentNode.state)
 
     def GreedySearchy(self, goal):
         """Greedy Search"""
@@ -301,7 +303,7 @@ class Node:
         while queue:
             path = queue.pop(0)
             state = path[-1]
-            open.remove(state)
+
             jugA = state[0]
             current.append(state)
 
@@ -322,6 +324,7 @@ class Node:
                         open.append(i)
                         self.writeEdgesToGraphviz(state, i, states.index(i))
 
+                open.remove(state)
                 queue = sorted(queue, key=lambda path: self.heValues(path))
                 closed.append(currentState.state)
 
@@ -357,8 +360,6 @@ class Node:
                         newPath.append(i)
                         queue.append(newPath)
                         open.append(i)
-                        if i== [4, 3]:
-                            print("oi")
                         self.writeEdgesToGraphviz(state, i, states.index(i))
 
                 queue = sorted(queue, key=lambda path: (self.realCost(path)) + self.heValues(path))
